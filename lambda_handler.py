@@ -166,7 +166,7 @@ def handler(event, context):
     elif code == FAMILY_CODE:
         state = door.check_door_state()
         door.toggle_door()
-        LOGGER.info('FAMILY: Family code used at %d:%d on %s door', esthour, now.minute, state)
+        LOGGER.info('FAMILY: Family code used at %d:%d EST on %s door', esthour, now.minute, state)
     else:
         LOGGER.warning('BAD CODE: Code %s was used -- forbidden!', code)
         return 'BAD CODE!'
