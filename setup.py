@@ -20,4 +20,5 @@ if __name__ == '__main__':
           author_email='jason.swails@gmail.com',
           py_modules=['lambda_handler'],
           packages=find_packages('.'),
+          package_data=dict(certifi=['*.pem']),
          )

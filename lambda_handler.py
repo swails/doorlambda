@@ -11,7 +11,7 @@ import requests
 def decrypt_environment_variable(variable_name):
     """ Decrypts the passed content """
     encrypted = os.environ[variable_name]
-    return boto3.client('kms').decrypt(CiphertextBlob=b64decode(encrypted))['Plaintext']
+    return boto3.client('kms').decrypt(CiphertextBlob=b64decode(encrypted))['Plaintext'].decode('utf-8')
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,7 +61,10 @@ class MyQGarageDoor(object):
         response = requests.post(self.BASE_URL + self.LOGIN_URI, headers=headers,
                                  json=dict(username=self.username, password=self.password))
         response.raise_for_status()
-        self._security_token = response.json()['SecurityToken']
+        try:
+            self._security_token = response.json()['SecurityToken']
+        except KeyError:
+            LOGGER.exception('Key not found: %s', response.json())
         self._get_opener()
 
     @needs_security_token
@@ -152,4 +155,4 @@ def handler(event, context):
         LOGGER.warning('BAD CODE: Code %s was used -- forbidden!', code)
         return dict(StatusCode=404, Status='404 Forbidden', body='Bad code!')
 
-    return dict(StatusCode=200, Status='200 OK', body='OK')
+    return dict(StatusCode=200, Status='200 OK', body='OK!')
