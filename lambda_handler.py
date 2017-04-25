@@ -15,9 +15,8 @@ def decrypt_environment_variable(variable_name):
 
 LOG_LEVELS = dict(INFO=logging.INFO, DEBUG=logging.DEBUG, WARN=logging.WARN, ERROR=logging.ERROR)
 
-logging.basicConfig(level=LOG_LEVELS[os.environ.get('LOGLEVEL', 'INFO')])
-
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(LOG_LEVELS[os.environ.get('LOGLEVEL', 'INFO')])
 
 def needs_security_token(func):
     """ Wrapper around functions that require a security token """
