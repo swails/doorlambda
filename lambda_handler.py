@@ -115,6 +115,16 @@ class MyQGarageDoor(object):
             LOGGER.warning('Could not determine door state. Closing door')
             self.close_door()
 
+def wrap_handler(func):
+    def wrapper(event, context):
+        try:
+            return func(event, context)
+        except Exception:
+            LOGGER.exception('Something went wrong!')
+            return 'Internal error'
+    return wrapper
+
+@wrap_handler
 def handler(event, context):
     """ Handles the Lambda request """
     # Get all of the environment variables
@@ -153,6 +163,6 @@ def handler(event, context):
         LOGGER.info('FAMILY: Family code used at %d:%d on %d door', esthour, now.minute, state)
     else:
         LOGGER.warning('BAD CODE: Code %s was used -- forbidden!', code)
-        return dict(StatusCode=404, Status='404 Forbidden', body='Bad code!')
+        return 'BAD CODE!'
 
-    return dict(StatusCode=200, Status='200 OK', body='OK!')
+    return 'OK'
