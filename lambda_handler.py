@@ -146,7 +146,10 @@ def handler(event, context):
     # Instantiate my door
     door = MyQGarageDoor(ACCOUNT, PASSWORD)
 
-    if code == CLEANER_CODE and now.strftime('%A') == CLEANER_DAY:
+    if code == CLEANER_CODE:
+        if now.strftime('%A') != CLEANER_DAY:
+            LOGGER.warning('CLEANER: Cleaner code executed on wrong day!')
+            return 'THIS CODE IS NOT ACTIVE TODAY. Event has been logged.'
         # Our code matches on the right day! Make sure it's an allowable time
         if EARLIEST_ALLOWED < esthour < LATEST_ALLOWED:
             door.toggle_door()
