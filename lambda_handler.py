@@ -13,6 +13,10 @@ def decrypt_environment_variable(variable_name):
     encrypted = os.environ[variable_name]
     return boto3.client('kms').decrypt(CiphertextBlob=b64decode(encrypted))['Plaintext'].decode('utf-8')
 
+LOG_LEVELS = dict(INFO=logging.INFO, DEBUG=logging.DEBUG, WARN=logging.WARN, ERROR=logging.ERROR)
+
+logging.basicConfig(level=LOG_LEVELS[os.environ.get('LOGLEVEL', 'INFO')])
+
 LOGGER = logging.getLogger(__name__)
 
 def needs_security_token(func):
