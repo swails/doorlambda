@@ -141,8 +141,7 @@ def handler(event, context):
     LATEST_ALLOWED = 17  # 5 PM EST, or 6 PM EDT
 
     cleaner_access = 'Thursday'
-    now = datetime.datetime.now() # this corresponds to UTC in Lambda
-    esthour = now.hour - 5 # east standard time hour is UTC - 5
+    now = datetime.datetime.now() - datetime.timedelta(hours=5) # EST is UTC - 5
     # The body must always be sent as {"body-json": "code=<code>"}
     code = event['body-json'][len('code='):]
 
@@ -152,21 +151,22 @@ def handler(event, context):
     if code == CLEANER_CODE:
         if now.strftime('%A') != CLEANER_DAY:
             LOGGER.warning('CLEANER: Cleaner code executed on wrong day!')
-            return 'THIS CODE IS NOT ACTIVE TODAY. Event has been logged.'
+            return 'THIS CODE IS NOT ACTIVE TODAY.'
         # Our code matches on the right day! Make sure it's an allowable time
-        if EARLIEST_ALLOWED < esthour < LATEST_ALLOWED:
+        if EARLIEST_ALLOWED < now.hour < LATEST_ALLOWED:
             door.toggle_door()
-            LOGGER.info('CLEANER: Cleaner opened the door at %d:%d EST', esthour, now.minute)
+            LOGGER.info('CLEANER: Cleaner opened the door at %d:%d EST', now.hour, now.minute)
         else:
             # We can close the door outside the allowed time slot
             state = door.check_door_state()
             door.close_door()
             LOGGER.warning('CLEANER: BAD TIME: Cleaner code used on %s door at %d:%d EST; '
-                           'Open forbidden', state, esthour, now.minute)
+                           'Open forbidden', state, now.hour, now.minute)
+            return 'OUTSIDE ALLOWED TIME. DOOR CLOSED'
     elif code == FAMILY_CODE:
         state = door.check_door_state()
         door.toggle_door()
-        LOGGER.info('FAMILY: Family code used at %d:%d EST on %s door', esthour, now.minute, state)
+        LOGGER.info('FAMILY: Family code used at %d:%d EST on %s door', now.hour, now.minute, state)
     else:
         LOGGER.warning('BAD CODE: Code %s was used -- forbidden!', code)
         return 'BAD CODE!'
