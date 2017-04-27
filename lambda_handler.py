@@ -153,20 +153,20 @@ def handler(event, context):
             LOGGER.warning('CLEANER: Cleaner code executed on wrong day!')
             return 'THIS CODE IS NOT ACTIVE TODAY.'
         # Our code matches on the right day! Make sure it's an allowable time
-        if EARLIEST_ALLOWED < now.hour < LATEST_ALLOWED:
+        if EARLIEST_ALLOWED <= now.hour <= LATEST_ALLOWED:
             door.toggle_door()
-            LOGGER.info('CLEANER: Cleaner opened the door at %d:%d EST', now.hour, now.minute)
+            LOGGER.info('CLEANER: Cleaner opened the door at %d:%02d EST', now.hour, now.minute)
         else:
             # We can close the door outside the allowed time slot
             state = door.check_door_state()
             door.close_door()
-            LOGGER.warning('CLEANER: BAD TIME: Cleaner code used on %s door at %d:%d EST; '
+            LOGGER.warning('CLEANER: BAD TIME: Cleaner code used on %s door at %d:%02d EST; '
                            'Open forbidden', state, now.hour, now.minute)
             return 'OUTSIDE ALLOWED TIME. DOOR CLOSED'
     elif code == FAMILY_CODE:
         state = door.check_door_state()
         door.toggle_door()
-        LOGGER.info('FAMILY: Family code used at %d:%d EST on %s door', now.hour, now.minute, state)
+        LOGGER.info('FAMILY: Family code used at %d:%02d EST on %s door', now.hour, now.minute, state)
     else:
         LOGGER.warning('BAD CODE: Code %s was used -- forbidden!', code)
         return 'BAD CODE!'
