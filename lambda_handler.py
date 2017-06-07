@@ -140,7 +140,6 @@ def handler(event, context):
     EARLIEST_ALLOWED = 7 # 7 AM EST, or 8 AM EDT
     LATEST_ALLOWED = 17  # 5 PM EST, or 6 PM EDT
 
-    cleaner_access = 'Thursday'
     now = datetime.datetime.now() - datetime.timedelta(hours=5) # EST is UTC - 5
     # The body must always be sent as {"body-json": "code=<code>"}
     code = event['body-json'][len('code='):]
