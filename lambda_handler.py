@@ -43,7 +43,7 @@ class MyQGarageDoor(object):
     password : str
         The account password for login
     """
-    APPLICATION_ID = "NWknvuBd7LoFHfXmKNMBcgajXtZEgKUh4V7WNzMidrpUUluDpVYVZx+xT4PCM5Kx"
+    APPLICATION_ID = decrypt_environment_variable('APPLICATION_ID')
     BASE_URL = 'https://myqexternal.myqdevice.com'
     LOGIN_URI = '/api/v4/User/Validate'
     DEVICELIST_URI = '/api/v4/userdevicedetails/get'
