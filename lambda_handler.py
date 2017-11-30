@@ -56,16 +56,20 @@ class MyQGarageDoor(object):
         self._security_token = None
         self._opener_id = None
         self._opener_state = None
+        self.session = requests.Session()
+        self.session.headers = dict(MyQApplicationId = self.APPLICATION_ID)
 
     def _login(self):
         """ Logs into the application """
         headers = {"User-Agent": "Chamberlain/3.73", "BrandId": "2", "ApiVersion": "4.1",
-                   "Culture": "en", "MyQApplicationId": self.APPLICATION_ID}
-        response = requests.post(self.BASE_URL + self.LOGIN_URI, headers=headers,
-                                 json=dict(username=self.username, password=self.password))
+                   "Culture": "en"}
+        if 'SecurityToken' in self.session.headers:
+            del self.session.headers['SecurityToken']
+        response = self.session.post(self.BASE_URL + self.LOGIN_URI, headers=headers,
+                                     json=dict(username=self.username, password=self.password))
         response.raise_for_status()
         try:
-            self._security_token = response.json()['SecurityToken']
+            self._security_token = self.session.headers['SecurityToken'] = response.json()['SecurityToken']
         except KeyError:
             LOGGER.exception('Key not found: %s', response.json())
         self._get_opener()
@@ -73,8 +77,7 @@ class MyQGarageDoor(object):
     @needs_security_token
     def _get_opener(self):
         """ Gets the list of devices and what state it's in """
-        parameters = dict(appId=self.APPLICATION_ID, SecurityToken=self._security_token)
-        response = requests.get(self.BASE_URL + self.DEVICELIST_URI, params=parameters)
+        response = self.session.get(self.BASE_URL + self.DEVICELIST_URI)
         response.raise_for_status()
         for device in response.json()['Devices']:
             if device['MyQDeviceTypeName'] == 'GarageDoorOpener':
@@ -92,11 +95,10 @@ class MyQGarageDoor(object):
     @needs_security_token
     def _set_door_state(self, value):
         """ Either opens the door (value=1) or closes the door (value=0) """
-        parameters = dict(appId=self.APPLICATION_ID, SecurityToken=self._security_token)
         body = dict(ApplicationID=self.APPLICATION_ID, SecurityToken=self._security_token,
                     MyQDeviceId=self._opener_id, AttributeName='desireddoorstate',
                     AttributeValue=value)
-        response = requests.put(self.BASE_URL + self.OPENCLOSE_URI, params=parameters, json=body)
+        response = self.session.put(self.BASE_URL + self.OPENCLOSE_URI, json=body)
         response.raise_for_status()
 
     def open_door(self):
